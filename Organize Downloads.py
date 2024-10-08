@@ -2,7 +2,8 @@
 from os import listdir
 from os.path import isfile, join, isdir
 import shutil
-import magic  
+import magic
+import os
 
 i = 1
 # Obtain the path to be organized
@@ -54,37 +55,46 @@ for item in items:
         else:
             print(f"{item} is a folder.")
             transfer_file(source_path, folder_file_path)
-
-    # If it's a file, use python-magic to detect the file type based on content
-    file_type = magic.from_file(source_path, mime=True)  # Detect file type based on content
-    print(f"File: {item}, File Type: {file_type}")
+            continue
     
-    if file_type:
-        # Media file check
-        if 'audio' in file_type:
-            transfer_file(source_path, audio_file_path)
-        elif 'image' in file_type:
-            transfer_file(source_path, image_file_path)
-        elif 'video' in file_type:
-            transfer_file(source_path, video_file_path)
-        # Document file check
-        elif 'text' in file_type:
-            transfer_file(source_path, text_file_path)
-        elif 'pdf' in file_type:
-            transfer_file(source_path, pdf_file_path)
-        elif 'msword' in file_type or 'word' in file_type:
-            transfer_file(source_path, docs_file_path)
-        elif 'excel' in file_type:
-            transfer_file(source_path, spreadsheet_file_path)
-        # Compressed file check
-        elif 'zip' in file_type or '7z' in file_type or 'rar' in file_type:
-            transfer_file(source_path, compressed_file_path)
-        # Executable file check
-        elif 'x-msdownload' in file_type or 'sh' in file_type:
-            transfer_file(source_path, executable_file_path)
-        # Torrent file check
-        elif 'bittorrent' in file_type:
-            transfer_file(source_path, torrent_file_path)
-        else:
-            transfer_file(source_path, general_file_path)
+    # Check if it's a file before detecting file type
+    if isfile(source_path):
+        try:
+            # Use python-magic to detect the file type based on content
+            file_type = magic.from_file(source_path, mime=True)  # Detect file type based on content
+            print(f"File: {item}, File Type: {file_type}")
+            
+            if file_type:
+                # Media file check
+                if 'audio' in file_type:
+                    transfer_file(source_path, audio_file_path)
+                elif 'image' in file_type:
+                    transfer_file(source_path, image_file_path)
+                elif 'video' in file_type:
+                    transfer_file(source_path, video_file_path)
+                # Document file check
+                elif 'text' in file_type:
+                    transfer_file(source_path, text_file_path)
+                elif 'pdf' in file_type:
+                    transfer_file(source_path, pdf_file_path)
+                elif 'msword' in file_type or 'word' in file_type:
+                    transfer_file(source_path, docs_file_path)
+                elif 'excel' in file_type:
+                    transfer_file(source_path, spreadsheet_file_path)
+                # Compressed file check
+                elif 'zip' in file_type or '7z' in file_type or 'rar' in file_type:
+                    transfer_file(source_path, compressed_file_path)
+                # Executable file check
+                elif 'x-msdownload' in file_type or 'sh' in file_type:
+                    transfer_file(source_path, executable_file_path)
+                # Torrent file check
+                elif 'bittorrent' in file_type:
+                    transfer_file(source_path, torrent_file_path)
+                else:
+                    transfer_file(source_path, general_file_path)
+        except magic.MagicException as e:
+            print(f"Error processing file: {item}. Skipping file due to magic exception: {str(e)}")
+        except Exception as e:
+            print(f"Unexpected error with file {item}: {str(e)}")
+    
     i += 1
